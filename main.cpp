@@ -34,8 +34,40 @@ struct CompareElements{
     }
 };
 
+ofstream outputFile("../encoded.txt",ios::out |ios::binary);  
+
+char buf;
+int count;
 map<char, vector<bool> > table;
 vector<bool> code;
+
+
+WriteBit(bool bit){
+    if(bit){
+        buf |= (1 << (7 - count));
+    }else
+    {
+        buf &= (0 << (7-count));
+    }
+    count++;
+    if (count == 8) {
+        outputFile << buf;
+        buf = 0;
+        count = 0;
+    }    
+}
+
+WriteNodes(Node*node){
+    if (node->left == NULL && node->right == NULL){
+        WriteBit(true);
+        outputFile << node->ch;
+        }
+    else {
+        WriteBit(false);
+        WriteNodes(node->left);
+        WriteNodes(node->right);
+        }
+    }
 
 BuildTable(Node * el){
     
@@ -78,6 +110,8 @@ int main(int argc, char** argv) {
         el->a = it->second;
         elements.push_back(el);
     }
+    
+    int nodesNumber = elements.size();
                     
     while(elements.size()>1){
         elements.sort(CompareElements());    
@@ -101,14 +135,17 @@ int main(int argc, char** argv) {
         for(int i = 0; i<sec.size();i++){
             cout << sec[i]?0:1;
         }
-        cout << "\n";
-            
+        cout << "\n";            
     }
     
     inputFile.clear();inputFile.seekg(0);
     
-    ofstream outputFile("../encoded.txt",ios::out |ios::binary);       
-    int count = 0; char buf;
+         
+    //writing tree to file
+    outputFile<<(nodesNumber+nodesNumber/8);
+    
+    WriteNodes(root);
+        
     cout << "\n";
     while(!inputFile.eof()){
         char c = inputFile.get();
@@ -117,9 +154,11 @@ int main(int argc, char** argv) {
             buf = buf | var[i]<<(7-count);
             count++;
             cout << var[i];
-            if (count==8){outputFile<<buf;buf = 0;};            
-        }
+            if (count==8){outputFile<<buf;buf = 0;count =0;};            
+        }   
     }
+    cout << "\n" << count << " - " << buf;
+
     inputFile.close();
     outputFile.close();
         
