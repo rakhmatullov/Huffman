@@ -11,6 +11,7 @@
 #include <fstream>
 #include <list>
 #include <vector>
+#include <bitset>
 
 using namespace std;
 
@@ -37,30 +38,42 @@ struct CompareElements{
 ofstream outputFile("../encoded.txt",ios::out |ios::binary);  
 
 char buf;
-int count;
+bitset<8> bits;
+int count=0;
 map<char, vector<bool> > table;
 vector<bool> code;
 
 
 WriteBit(bool bit){
-    if(bit){
-        buf |= (1 << (7 - count));
-    }else
-    {
-        buf &= (0 << (7-count));
-    }
+    bits[7-count]=bit;
     count++;
-    if (count == 8) {
-        outputFile << buf;
-        buf = 0;
-        count = 0;
-    }    
+    if (count==8){
+        outputFile << bits;
+        cout<<bits;
+        bits.reset();
+        count=0;
+        
+    };
+}
+
+WriteByte(char ch){
+    bitset<8> chBits(ch);
+    for(int i = 0; i<8;i++){        
+        bits[7-count]=chBits[7-i];
+        count++;
+        if (count==8){
+            outputFile << bits;
+            cout << bits;
+            bits.reset();
+            count =0;            
+        };
+    }
 }
 
 WriteNodes(Node*node){
     if (node->left == NULL && node->right == NULL){
         WriteBit(true);
-        outputFile << node->ch;
+        WriteByte(node->ch);
         }
     else {
         WriteBit(false);
@@ -114,6 +127,7 @@ int main(int argc, char** argv) {
     int nodesNumber = elements.size();
                     
     while(elements.size()>1){
+        nodesNumber++;
         elements.sort(CompareElements());    
         Node * left = elements.front();
         elements.pop_front();
@@ -140,24 +154,28 @@ int main(int argc, char** argv) {
     
     inputFile.clear();inputFile.seekg(0);
     
-         
+    cout << "\n"<<"Number of nodes-"<<nodesNumber << "\n";;     
     //writing tree to file
-    outputFile<<(nodesNumber+nodesNumber/8);
+    
+    outputFile<<nodesNumber;
     
     WriteNodes(root);
-        
-    cout << "\n";
+    
     while(!inputFile.eof()){
         char c = inputFile.get();
         vector<bool> var = table[c];
         for(int i = 0; i < var.size();i++){
-            buf = buf | var[i]<<(7-count);
+            bool b = var[i];
+            bits[7-count]=var[i];
             count++;
-            cout << var[i];
-            if (count==8){outputFile<<buf;buf = 0;count =0;};            
+            if (count==8){
+                outputFile<<bits;cout << bits;bits.reset();count=0;
+            }            
         }   
-    }
-    cout << "\n" << count << " - " << buf;
+    }   
+    
+    if(count>0)cout<<bits;
+    cout << "\n" << count;
 
     inputFile.close();
     outputFile.close();
