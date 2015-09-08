@@ -12,6 +12,16 @@
 #include <vector>
 using namespace std;
 
+ReadBit(){
+    
+}
+
+ReadByte(){
+    
+}
+ReadTreeElement(){
+    
+}
 /*
  * 
  */
@@ -19,7 +29,8 @@ int main(int argc, char** argv) {
     ifstream encodedFile("../encoded.txt", ifstream::in);
     
     char numberOfTreeElements = encodedFile.get();
-    cout<< "Number of tree elements: " << numberOfTreeElements <<"\n";
+    cout<< "Number of tree elements: " << (int)numberOfTreeElements <<"\n";
+    ReadTreeElement();
     vector<char>symbols;
     while(!encodedFile.eof()){
         symbols.push_back(encodedFile.get());        
@@ -30,7 +41,7 @@ int main(int argc, char** argv) {
     }
     cout << "\n";
     for(vector<char>::iterator it = symbols.begin(); it!=symbols.end();it++){
-        std::bitset<8> bits(*it);        
+        std::bitset<8> bits(*it);            
         cout << bits;
     }
     encodedFile.close();
