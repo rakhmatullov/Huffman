@@ -57,10 +57,20 @@ WriteBit(bool bit){
     }    
 }
 
+WhiteByte(char*ch){
+    bitset<8> bits(&ch);
+    count++;
+    if (count == 8) {
+        outputFile << buf;
+        buf = 0;
+        count = 0;
+    }    
+}
+
 WriteNodes(Node*node){
     if (node->left == NULL && node->right == NULL){
         WriteBit(true);
-        outputFile << node->ch;
+        WriteByte(node->ch);
         }
     else {
         WriteBit(false);
