@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
     
     inputFile.clear();inputFile.seekg(0);
     
-    cout << "\n"<<"Number of nodes-"<<nodesNumber << "\n";;     
+    cout << "\n"<<"Number of nodes : "<<nodesNumber << "\n";;     
     //writing tree to file
     
     outputFile<<nodesNumber;
