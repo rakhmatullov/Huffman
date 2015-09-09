@@ -157,7 +157,7 @@ int main(int argc, char** argv) {
     cout << "\n"<<"Number of nodes : "<<nodesNumber << "\n";;     
     //writing tree to file
     
-    outputFile<<nodesNumber;
+    //outputFile<<nodesNumber;
     
     WriteNodes(root);
     
@@ -174,8 +174,11 @@ int main(int argc, char** argv) {
         }   
     }   
     
-    if(count>0)cout<<bits;
-    cout << "\n" << count;
+    if(count>0){
+      cout<<bits;
+      cout << "\n" << count;
+      outputFile<<bits;
+    }
 
     inputFile.close();
     outputFile.close();
