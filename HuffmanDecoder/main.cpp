@@ -27,15 +27,15 @@ public:
 };
 bitset<8> bits;
 int count=8;
-ifstream encodedFile("../encoded.txt", ifstream::in);
+ifstream encodedFile("../encoded.txt", ifstream::in | ios::binary);
 ofstream decodedFile ("../decoded.txt",ios::out |ios::binary);
 char numberOfTreeElements;
 
 bool ReadBit(){
     if (count==8){
-        char ch = encodedFile.get();
-        bits = bitset<8>(ch);
-        count=0;
+            char ch = encodedFile.get();
+            bits = bitset<8>(ch);
+            count=0;
     };
     bool bit = bits[7-count];    
     count++;
@@ -87,8 +87,8 @@ int main(int argc, char** argv) {
             currentNode = currentNode->right;
         }
         if(currentNode->left==NULL){
-           decodedFile << currentNode->ch;
            if(((int)currentNode->ch)==-1)break;
+           decodedFile << currentNode->ch;
            currentNode = topNode;
         }
     }
