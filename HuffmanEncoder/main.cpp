@@ -49,7 +49,6 @@ WriteBit(bool bit){
     count++;
     if (count==8){
         outputFile << static_cast<char>(bits.to_ulong());
-        //cout<<bits;
         bits.reset();
         count=0;
         
@@ -63,7 +62,6 @@ WriteByte(char ch){
         count++;
         if (count==8){
             outputFile << static_cast<char>(bits.to_ulong());
-            //cout << bits;
             bits.reset();
             count =0;            
         };
