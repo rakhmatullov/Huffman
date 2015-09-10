@@ -103,7 +103,7 @@ BuildTable(Node * el){
  * 
  */
 int main(int argc, char** argv) {        
-    ifstream inputFile("../text.txt", ifstream::in);
+    ifstream inputFile("../text.txt", ifstream::in | ios::binary);
     
     map<char, int> symbolsWeights;
     
