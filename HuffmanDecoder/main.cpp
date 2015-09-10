@@ -27,15 +27,15 @@ public:
 };
 bitset<8> bits;
 int count=8;
-//int currentNumber=0;
 ifstream encodedFile("../encoded.txt", ifstream::in);
+ofstream decodedFile ("../decoded.txt",ios::out |ios::binary);
 char numberOfTreeElements;
 
 bool ReadBit(){
     if (count==8){
-        encodedFile >> bits;
-        cout<<bits;        
-        count=0;        
+        char ch = encodedFile.get();
+        bits = bitset<8>(ch);
+        count=0;
     };
     bool bit = bits[7-count];    
     count++;
@@ -45,20 +45,20 @@ bool ReadBit(){
 char ReadByte(){
     bitset<8> chBits;
     
-    for(int i = 0; i<8;i++){        
-        chBits[7-i]=bits[7-count];
-        count++;
+    for(int i = 0; i<8;i++){   
         if (count==8){
-            encodedFile >> bits;
-            cout << bits;            
-            count = 0;            
+            char ch = encodedFile.get();
+            bits = bitset<8>(ch);
+            count = 0;
         };
+        bool b = bits[7-count];
+        chBits[7-i]=b;
+        count++;
     }
     return static_cast<char>(chBits.to_ulong());
 };
 
 Node* ReadTreeElement(){
-  //      currentNumber++;
         bool b = ReadBit();
         if (b){
             char ch = ReadByte();
@@ -71,14 +71,14 @@ Node* ReadTreeElement(){
 /*
  * 
  */
+
+int sh=0;
+
 int main(int argc, char** argv) {
-    //numberOfTreeElements = encodedFile.get();
-    //cout<< "Number of tree elements: " << (int)numberOfTreeElements <<"\n";
     Node *topNode = ReadTreeElement();
     Node*currentNode = topNode;
-    
-    //vector<char>symbols;
-    while(!encodedFile.eof()&&count<8){
+    cout<<"\n";
+    while(!encodedFile.eof() || count>0){
         bool b = ReadBit();
         if (!b){
             currentNode = currentNode->left;
@@ -87,21 +87,13 @@ int main(int argc, char** argv) {
             currentNode = currentNode->right;
         }
         if(currentNode->left==NULL){
-           cout << currentNode->ch;
+           decodedFile << currentNode->ch;
+           if(((int)currentNode->ch)==-1)break;
            currentNode = topNode;
         }
     }
-    /*
-    for(int i = 0; i<symbols.size();i++){
-        cout << symbols[i];
-    }
-    cout << "\n";
-    for(vector<char>::iterator it = symbols.begin(); it!=symbols.end();it++){
-        std::bitset<8> bits(*it);            
-        cout << bits;
-    } 
-    */
     encodedFile.close();
+    decodedFile.close();
     return 0;
 }
 
