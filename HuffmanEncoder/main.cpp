@@ -48,8 +48,8 @@ WriteBit(bool bit){
     bits[7-count]=bit;
     count++;
     if (count==8){
-        outputFile << bits;
-        cout<<bits;
+        outputFile << static_cast<char>(bits.to_ulong());
+        //cout<<bits;
         bits.reset();
         count=0;
         
@@ -62,8 +62,8 @@ WriteByte(char ch){
         bits[7-count]=chBits[7-i];
         count++;
         if (count==8){
-            outputFile << bits;
-            cout << bits;
+            outputFile << static_cast<char>(bits.to_ulong());
+            //cout << bits;
             bits.reset();
             count =0;            
         };
@@ -100,10 +100,11 @@ BuildTable(Node * el){
     }
     code.pop_back();
 }
+
 /*
  * 
  */
-int main(int argc, char** argv) {
+int main(int argc, char** argv) {        
     ifstream inputFile("../text.txt", ifstream::in);
     
     map<char, int> symbolsWeights;
@@ -113,8 +114,6 @@ int main(int argc, char** argv) {
         symbolsWeights[ch]++;        
     }    
 
-    cout << "Number of symbols" << " : "<<symbolsWeights.size() << "\n";
-    
     list<Node*> elements;
     
     for(map<char, int>::iterator it=symbolsWeights.begin();it!=symbolsWeights.end();it++){
@@ -124,10 +123,7 @@ int main(int argc, char** argv) {
         elements.push_back(el);
     }
     
-    int nodesNumber = elements.size();
-                    
     while(elements.size()>1){
-        nodesNumber++;
         elements.sort(CompareElements());    
         Node * left = elements.front();
         elements.pop_front();
@@ -141,23 +137,7 @@ int main(int argc, char** argv) {
     
     BuildTable(root);
     
-    cout << "\n";
-    
-    for(map<char, vector<bool> >::iterator  it=table.begin(); it!=table.end();it++){
-        cout << it->first << " ";
-        vector<bool> sec = it->second;
-        for(int i = 0; i<sec.size();i++){
-            cout << sec[i]?0:1;
-        }
-        cout << "\n";            
-    }
-    
     inputFile.clear();inputFile.seekg(0);
-    
-    cout << "\n"<<"Number of nodes : "<<nodesNumber << "\n";;     
-    //writing tree to file
-    
-    //outputFile<<nodesNumber;
     
     WriteNodes(root);
     
@@ -169,20 +149,17 @@ int main(int argc, char** argv) {
             bits[7-count]=var[i];
             count++;
             if (count==8){
-                outputFile<<bits;cout << bits;bits.reset();count=0;
+                outputFile<<static_cast<char>(bits.to_ulong());bits.reset();count=0;
             }            
         }   
     }   
     
     if(count>0){
-      cout<<bits;
-      cout << "\n" << count;
-      outputFile<<bits;
+      outputFile<<static_cast<char>(bits.to_ulong());
     }
 
     inputFile.close();
     outputFile.close();
         
     return 0;
-    
 }
