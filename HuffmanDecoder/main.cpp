@@ -93,8 +93,10 @@ int main(int argc, char** argv) {
         if(currentNode->left==NULL){
            if (encodedFile.eof())break;
            if(((int)currentNode->ch)==-1){
-               breakRequired=true;
-               tempChar = encodedFile.get();
+               if(!breakRequired){
+                breakRequired=true;
+                tempChar = encodedFile.get();
+               }
                if (encodedFile.eof()) break;
            }
            decodedFile << currentNode->ch;
