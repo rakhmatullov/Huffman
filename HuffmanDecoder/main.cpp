@@ -29,13 +29,17 @@ bitset<8> bits;
 int count=8;
 ifstream encodedFile("../encoded.txt", ifstream::in | ios::binary);
 ofstream decodedFile ("../decoded.txt",ios::out |ios::binary);
-char numberOfTreeElements;
+char tempChar;
+int sh=0;
+bool breakRequired=true;
 
 bool ReadBit(){
     if (count==8){
-            char ch = encodedFile.get();
-            bits = bitset<8>(ch);
-            count=0;
+        char ch;
+        if (breakRequired) {ch = tempChar; breakRequired = false;}
+        else ch = encodedFile.get();
+        bits = bitset<8>(ch);
+        count=0;
     };
     bool bit = bits[7-count];    
     count++;
@@ -72,24 +76,29 @@ Node* ReadTreeElement(){
  * 
  */
 
-int sh=0;
-
 int main(int argc, char** argv) {
-    Node *topNode = ReadTreeElement();
-    Node*currentNode = topNode;
+    tempChar = encodedFile.get();
+    Node*currentNode;
+    Node *topNode;
+    if(!(((int)tempChar)==-1)){
+        topNode = ReadTreeElement();
+        currentNode = topNode;
+    }
     cout<<"\n";
-    while(!encodedFile.eof() || count>0){
+    while(!encodedFile.eof() || count<8){
         bool b = ReadBit();
-        if (!b){
-            currentNode = currentNode->left;
-        }
-        else{
-            currentNode = currentNode->right;
-        }
+        if (!b) currentNode = currentNode->left;
+        else    currentNode = currentNode->right;
+        
         if(currentNode->left==NULL){
-           if(((int)currentNode->ch)==-1)break;
+           if (encodedFile.eof())break;
+           if(((int)currentNode->ch)==-1){
+               breakRequired=true;
+               tempChar = encodedFile.get();
+               if (encodedFile.eof()) break;
+           }
            decodedFile << currentNode->ch;
-           currentNode = topNode;
+           currentNode = topNode;           
         }
     }
     encodedFile.close();

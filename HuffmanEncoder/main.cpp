@@ -48,6 +48,7 @@ WriteBit(bool bit){
     bits[7-count]=bit;
     count++;
     if (count==8){
+        //cout<<bits;
         outputFile << static_cast<char>(bits.to_ulong());
         bits.reset();
         count=0;
@@ -61,6 +62,7 @@ WriteByte(char ch){
         bits[7-count]=chBits[7-i];
         count++;
         if (count==8){
+            //cout<<bits;
             outputFile << static_cast<char>(bits.to_ulong());
             bits.reset();
             count =0;            
@@ -118,6 +120,7 @@ int main(int argc, char** argv) {
         Node * el = new Node();
         el->ch = it->first;
         el->a = it->second;
+        //cout<<it->first<<"\n";
         elements.push_back(el);
     }
     
@@ -137,7 +140,9 @@ int main(int argc, char** argv) {
     
     inputFile.clear();inputFile.seekg(0);
     
-    WriteNodes(root);
+    if(root->left!=NULL){
+        WriteNodes(root);
+    }
     
     while(!inputFile.eof()){
         char c = inputFile.get();
@@ -147,12 +152,14 @@ int main(int argc, char** argv) {
             bits[7-count]=var[i];
             count++;
             if (count==8){
+          //      cout<<bits;
                 outputFile<<static_cast<char>(bits.to_ulong());bits.reset();count=0;
             }            
         }   
     }   
     
     if(count>0){
+        //cout<<bits;
       outputFile<<static_cast<char>(bits.to_ulong());
     }
 
