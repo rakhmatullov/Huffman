@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   main.cpp
  * Author: User
  *
@@ -12,15 +12,16 @@
 #include <list>
 #include <vector>
 #include <bitset>
+#include <sys/stat.h>
 
 using namespace std;
 
 class Node{
-public: 
+public:
     char ch;
-    int a;    
-    Node *left, *right;    
-    
+    int a;
+    Node *left, *right;
+
     Node(){left=right=NULL;}
     Node(Node*l, Node*r){
         left = l;
@@ -35,7 +36,7 @@ struct CompareElements{
     }
 };
 
-ofstream outputFile("../encoded.txt",ios::out |ios::binary);  
+ofstream outputFile("../encoded.txt",ios::out |ios::binary);
 
 char buf;
 bitset<8> bits;
@@ -52,20 +53,20 @@ WriteBit(bool bit){
         outputFile << static_cast<char>(bits.to_ulong());
         bits.reset();
         count=0;
-        
+
     };
 }
 
 WriteByte(char ch){
     bitset<8> chBits(ch);
-    for(int i = 0; i<8;i++){        
+    for(int i = 0; i<8;i++){
         bits[7-count]=chBits[7-i];
         count++;
         if (count==8){
             //cout<<bits;
             outputFile << static_cast<char>(bits.to_ulong());
             bits.reset();
-            count =0;            
+            count =0;
         };
     }
 }
@@ -83,18 +84,18 @@ WriteNodes(Node*node){
     }
 
 BuildTable(Node * el){
-    
-        
+
+
     if (el->left!=NULL){
         code.push_back(0);
         BuildTable(el->left);
     }
-    
+
     if (el->right!=NULL){
         code.push_back(1);
         BuildTable(el->right);
-    }  
-    
+    }
+
     if(el->left == NULL && el->right == NULL) {
         table[el->ch]=code;
     }
@@ -102,20 +103,33 @@ BuildTable(Node * el){
 }
 
 /*
- * 
+ *
  */
-int main(int argc, char** argv) {        
-    ifstream inputFile("../text.txt", ifstream::in | ios::binary);
+int main(int argc, char** argv) {
+    const char * fileLocation;
     
+    //getting the argument - location of a file to encode
+    if (argc>1) fileLocation = argv[1];
+    else fileLocation = "../text.txt";
+    struct stat buffer;
+    
+    //checking if the file exists
+    if (stat(fileLocation,  &buffer)!=0){
+        cout<<"Input file cannot be open";
+        return 1;
+    }
+
+    ifstream inputFile(fileLocation, ifstream::in | ios::binary);
+
     map<char, int> symbolsWeights;
-    
+
     while(!inputFile.eof()){
         char ch = inputFile.get();
-        symbolsWeights[ch]++;        
-    }    
+        symbolsWeights[ch]++;
+    }
 
     list<Node*> elements;
-    
+
     for(map<char, int>::iterator it=symbolsWeights.begin();it!=symbolsWeights.end();it++){
         Node * el = new Node();
         el->ch = it->first;
@@ -123,9 +137,9 @@ int main(int argc, char** argv) {
         //cout<<it->first<<"\n";
         elements.push_back(el);
     }
-    
+
     while(elements.size()>1){
-        elements.sort(CompareElements());    
+        elements.sort(CompareElements());
         Node * left = elements.front();
         elements.pop_front();
         Node * right = elements.front();
@@ -133,17 +147,17 @@ int main(int argc, char** argv) {
         Node * parent = new Node(left, right);
         elements.push_back(parent);
     }
-    
+
     Node * root = elements.front();
-    
+
     BuildTable(root);
-    
+
     inputFile.clear();inputFile.seekg(0);
-    
+
     if(root->left!=NULL){
         WriteNodes(root);
     }
-    
+
     while(!inputFile.eof()){
         char c = inputFile.get();
         vector<bool> var = table[c];
@@ -154,10 +168,10 @@ int main(int argc, char** argv) {
             if (count==8){
           //      cout<<bits;
                 outputFile<<static_cast<char>(bits.to_ulong());bits.reset();count=0;
-            }            
-        }   
-    }   
-    
+            }
+        }
+    }
+
     if(count>0){
         //cout<<bits;
       outputFile<<static_cast<char>(bits.to_ulong());
@@ -165,6 +179,6 @@ int main(int argc, char** argv) {
 
     inputFile.close();
     outputFile.close();
-        
+
     return 0;
 }
