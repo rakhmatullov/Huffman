@@ -25,31 +25,33 @@ public:
         left=right=NULL;
     }
 };
-bitset<8> bits;
-int count=8;
-ifstream encodedFile("../encoded.txt", ifstream::in | ios::binary);
-ofstream decodedFile ("../decoded.txt",ios::out |ios::binary);
-char tempChar;
-int sh=0;
-bool breakRequired=true;
 
-bool ReadBit(){
+class BufferedReader{
+    int count=8;
+    bitset<8> bits;
+    ifstream encodedFile;
+    char tempChar;
+public: 
+    BufferedReader(char*filePath){
+        tempChar = encodedFile.get();
+        encodedFile.open(filePath, ifstream::in | ios::binary);
+    }
+    ~BufferedReader(){
+        encodedFile.close();
+    }
+    bool ReadBit(){
     if (count==8){
-        char ch;
-        if (breakRequired) {ch = tempChar; breakRequired = false;}
-        else ch = encodedFile.get();
-        bits = bitset<8>(ch);
+        bits = bitset<8>(tempChar);
+        tempChar = encodedFile.get();
         count=0;
     };
     bool bit = bits[7-count];    
     count++;
     return bit;
-};
-
-char ReadByte(){
-    bitset<8> chBits;
-    
-    for(int i = 0; i<8;i++){   
+    }
+    char ReadByte(){
+        bitset<8> chBits;    
+        for(int i = 0; i<8;i++){   
         if (count==8){
             char ch = encodedFile.get();
             bits = bitset<8>(ch);
@@ -58,52 +60,66 @@ char ReadByte(){
         bool b = bits[7-count];
         chBits[7-i]=b;
         count++;
+        }
+        return static_cast<char>(chBits.to_ulong());
     }
-    return static_cast<char>(chBits.to_ulong());
+    bool EndOfStream(){
+        return encodedFile.eof();
+    }
 };
 
-Node* ReadTreeElement(){
-        bool b = ReadBit();
+Node* ReadTreeElement(BufferedReader reader){
+        bool b = reader.ReadBit();
         if (b){
-            char ch = ReadByte();
+            char ch = reader.ReadByte();
             return new Node(ch);
         }else
         {
-            return new Node(ReadTreeElement(), ReadTreeElement());
+            return new Node(ReadTreeElement(reader), ReadTreeElement(reader));
         }
 };
+
 /*
- * 
+ * Decodes original file from its compressed/encoded image file
  */
 
 int main(int argc, char** argv) {
-    tempChar = encodedFile.get();
-    Node*currentNode;
+    BufferedReader reader;
+    //getting location of encoded file in the argument or setting default one
+    const char *fileLocation;
+    if(argc>1) fileLocation = argv[1];
+    else fileLocation = "../encoded.txt";
+
+    //checking if encoded file exists
+    struct stat buffer;    
+    if (stat(fileLocation,  &buffer)!=0){
+        cout<<"Input file cannot be open";
+        return 1;
+    } else{
+        reader = new BufferedReader(fileLocation);
+    }
+    
+    Node *currentNode;
     Node *topNode;
-    if(!(((int)tempChar)==-1)){
-        topNode = ReadTreeElement();
+    if(!(((int)reader.ReadByte())==-1)){
+        topNode = ReadTreeElement(reader);
         currentNode = topNode;
     }
     cout<<"\n";
-    while(!encodedFile.eof() || count<8){
-        bool b = ReadBit();
+    
+    ofstream decodedFile("../decoded.txt",ios::out |ios::binary);    
+    while(!reader.EndOfStream()){
+        bool b = reader.ReadBit();
         if (!b) currentNode = currentNode->left;
         else    currentNode = currentNode->right;
         
         if(currentNode->left==NULL){
-           if (encodedFile.eof())break;
-           if(((int)currentNode->ch)==-1){
-               if(!breakRequired){
-                breakRequired=true;
-                tempChar = encodedFile.get();
-               }
-               if (encodedFile.eof()) break;
-           }
+           if (reader.EndOfStream()) break;
+           
            decodedFile << currentNode->ch;
            currentNode = topNode;           
         }
     }
-    encodedFile.close();
     decodedFile.close();
     return 0;
 }
