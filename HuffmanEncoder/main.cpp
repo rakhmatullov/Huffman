@@ -12,6 +12,7 @@
 #include <list>
 #include <vector>
 #include <bitset>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -48,7 +49,7 @@ WriteBit(bool bit){
     bits[7-count]=bit;
     count++;
     if (count==8){
-        //cout<<bits;
+        cout<<bits;
         outputFile << static_cast<char>(bits.to_ulong());
         bits.reset();
         count=0;
@@ -62,7 +63,7 @@ WriteByte(char ch){
         bits[7-count]=chBits[7-i];
         count++;
         if (count==8){
-            //cout<<bits;
+            cout<<bits;
             outputFile << static_cast<char>(bits.to_ulong());
             bits.reset();
             count =0;            
@@ -105,8 +106,17 @@ BuildTable(Node * el){
  * 
  */
 int main(int argc, char** argv) {        
-    ifstream inputFile("../text.txt", ifstream::in | ios::binary);
+    const char*filePath;
+    if(argc>1) filePath = argv[1];
+    else filePath = "../text.txt";
     
+    ifstream inputFile(filePath, ifstream::in | ios::binary);
+    
+    struct stat buffer;
+    if(!(stat(filePath,&buffer)==0)) {
+        cout<<"Input file doesn't exist";
+        return 1;
+    }
     map<char, int> symbolsWeights;
     
     while(!inputFile.eof()){
@@ -152,16 +162,27 @@ int main(int argc, char** argv) {
             bits[7-count]=var[i];
             count++;
             if (count==8){
-          //      cout<<bits;
+                cout<< bits<<"\n";
                 outputFile<<static_cast<char>(bits.to_ulong());bits.reset();count=0;
             }            
         }   
     }   
-    
-    if(count>0){
-        //cout<<bits;
-      outputFile<<static_cast<char>(bits.to_ulong());
+    cout<<"\n count:"<<count<<"\n";
+    if(count>5){
+        cout<<"Prelast bits: "<<bits<<"\n";
+        outputFile<<static_cast<char>(bits.to_ulong());
+        bits.reset();
+    };
+       
+    // finding out how many bits to read from last 8 bits
+    bitset<3> bitsToRead(count);
+        
+    for(int i=0;i<3;i++){
+        bits[i]= bitsToRead[i];
     }
+    cout<<"Last bits: "<<bits<<"\n";    
+    outputFile<<static_cast<char>(bits.to_ulong());
+    
 
     inputFile.close();
     outputFile.close();
